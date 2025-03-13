@@ -12,6 +12,12 @@ fig = go.Figure(data = go.Scatter(
     )
 ))
 
+fig.update_layout(
+    title="notas dos alunos por idade",
+    xaxis_title="Idades",
+    yaxis_title="Pontuação"
+)
+
 fig.update_traces(error_y=dict(
     type = "data",
     array = [3, 2, 4, 1, 2 ,3, 4],
