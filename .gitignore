@@ -1,0 +1,8 @@
+#variáveis de ambiente
+.env
+.env.secret
+env/
+
+#embiente virtual do python
+venv/
+
