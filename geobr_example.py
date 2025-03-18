@@ -12,7 +12,8 @@ import geobr
 import geopandas as gp
 import plotly.express as px
 
-muni = geobr.read_municipality(code_muni="SC", year=2022)
+muni = geobr.read_municipality(code_muni=4203204.0, year=2022)
 
-gdf = muni[muni.name_muni=="Camboriú"]
+multipoints = muni.geometry
+print(multipoints)
 
