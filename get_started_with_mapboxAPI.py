@@ -2,10 +2,12 @@ import pandas as pd
 import geopandas as gpd
 import plotly.graph_objects as go
 
+
 from functools import partial
 from dotenv import load_dotenv, dotenv_values
 from geopy.geocoders import Nominatim
 from typing import Tuple, List, Dict
+from asyncio import Future, create_task
 
 
 
@@ -73,8 +75,7 @@ target_city = "Camboriú, Santa Catarina"
         implementar um try except no geocoder (ele é uma api que precisa de internet) pode gerar erro de conexão
 """
 def get_address_by_result_type(df: pd.DataFrame, result_type: str) -> pd.DataFrame:
-    aggravation_case_addresses = df[df["RESULTADO"] == result_type]["ENDEREÇO"]
-    address_list: List[str] = aggravation_case_addresses.values
+    address_list = df[df["RESULTADO"] == result_type]["ENDEREÇO"]
     coordinates_list = []
     for address in address_list:
         geolocation = geocode(address)
@@ -100,7 +101,7 @@ def display_scatter_map(marker_points=pd.DataFrame):
         mode="markers",
         marker=go.scattermap.Marker(
             size=14,
-            opacity=2,
+            opacity=0.5,
             color="red"
         ),
         text=["Camboriú"]
