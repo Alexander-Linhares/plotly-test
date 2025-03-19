@@ -1,14 +1,14 @@
 import pandas as pd
 import geopandas as gpd
 import plotly.graph_objects as go
+import flet
 
 
 from functools import partial
 from dotenv import load_dotenv, dotenv_values
 from geopy.geocoders import Nominatim
 from typing import Tuple, List, Dict
-from asyncio import Future, create_task
-
+from asyncio import Future, create_task, run
 
 
 
@@ -74,7 +74,9 @@ target_city = "Camboriú, Santa Catarina"
         implementar um async/await para rodar paralelamente ao programa final
         implementar um try except no geocoder (ele é uma api que precisa de internet) pode gerar erro de conexão
 """
-def get_address_by_result_type(df: pd.DataFrame, result_type: str) -> pd.DataFrame:
+async def get_address_by_result_type(
+        df: pd.DataFrame, result_type: str, state: Future) -> None:
+    
     address_list = df[df["RESULTADO"] == result_type]["ENDEREÇO"]
     coordinates_list = []
     for address in address_list:
@@ -84,16 +86,17 @@ def get_address_by_result_type(df: pd.DataFrame, result_type: str) -> pd.DataFra
                 geolocation.longitude,
                 geolocation.latitude))
     
-    return pd.DataFrame(
+    state.set_result(pd.DataFrame(
         coordinates_list, 
         columns=['longitude', 'latitude']
-    )
+    ))
 
     
 
-def display_scatter_map(marker_points=pd.DataFrame):
+async def display_scatter_map(state: Future):
     cordinates = geocode(target_city)
 
+    marker_points = await state
     #cria o gráfico de disperção
     scattermap = go.Scattermap(
         lat=marker_points['latitude'],
@@ -124,9 +127,29 @@ def display_scatter_map(marker_points=pd.DataFrame):
 
     fig.show()
 
+async def load_map(df: pd.DataFrame):
+    STATE = Future()
+    fetch_points_task = create_task(
+        get_address_by_result_type(
+                df, "CLINICO EPIDEMIOLÓGICO", STATE
+            )
+        )
+    display_map_task = create_task(
+        display_scatter_map(STATE)
+    )
+    
+    await fetch_points_task
+    await display_map_task
+    
+
+async def app():
+    df = pd.read_excel("./database/db1.xlsx")
+    load_map_task = create_task(load_map(df))
+
+    print("resto do código vem aqui")
+    await load_map_task
+
 if __name__ == "__main__":
     #display_map()
-    df = pd.read_excel("./database/db1.xlsx")
-    map_points = get_address_by_result_type(df, "CLINICO EPIDEMIOLÓGICO")
-    display_scatter_map(map_points)
+    run(app())
 

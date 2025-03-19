@@ -39,6 +39,7 @@ async def main():
 async def app():
     print("Iniciando app")
     async_main = asyncio.create_task(main())
+    #a renderização não depende do resultado de async_main, assim não precisa esperar sua execução
     print("Renderizando aplicativo")
     await async_main
 
